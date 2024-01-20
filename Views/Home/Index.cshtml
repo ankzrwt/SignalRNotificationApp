@@ -1,0 +1,44 @@
+﻿
+
+<div>
+    <input id="notificationMessage" type="text"></input>
+    <input id="SendNotification" type="button" value="SendNotification"></input>
+</div>
+
+<ul id="notification"></ul>
+
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+
+        var messageInput = document.getElementById('notificationMessage');
+        var name = prompt('Please enter your good name:', '');
+    
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/notify')
+            .build();
+
+        
+  
+        connection.start()
+            .then(function () {
+                document.getElementById('SendNotification').addEventListener('click', function (event) {
+                    connection.invoke('SendNotification', name, messageInput.value);
+                    messageInput.value = '';
+                    event.preventDefault();
+                });
+            })
+            .catch(error => {
+                console.error(error.message);
+
+            });
+
+
+        connection.on('NotifyAll', function (name, message) {
+
+            var liElement = document.createElement('li');
+            liElement.innerHTML = '<strong>' + name + '</strong>: ' + message;
+            document.getElementById('notification').appendChild(liElement);
+        });
+    });
+</script>
